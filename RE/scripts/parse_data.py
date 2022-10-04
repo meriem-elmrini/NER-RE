@@ -5,13 +5,9 @@ from pathlib import Path
 from wasabi import Printer
 import traceback
 
-import re
 import spacy
 from spacy.vocab import Vocab
-from spacy.lang.en import English
-from spacy.tokenizer import Tokenizer
-from spacy.tokens import Span, DocBin, Doc
-from spacy.util import compile_infix_regex
+from spacy.tokens import DocBin, Doc
 
 nlp = spacy.blank("en")
 # Create a blank Tokenizer with just the English vocab
@@ -19,18 +15,32 @@ nlp = spacy.blank("en")
 msg = Printer()
 
 MAP_LABELS = {
-    "Pos-Reg": "Regulates",
-    "Neg-Reg": "Regulates",
-    "Reg": "Regulates",
-    "No-rel": "Regulates",
-    "Binds": "Binds",
+    'block': 'Block',
+    'bind': 'Bind',
+    'regul': 'Regulate',
+    'reduc': 'Reduce',
+    'suppress': 'Supress',
+    'promote': 'Promote',
+    'activ': 'Activate',
+    'inhibit': 'Inhibit',
+    'express': 'Express',
+    'elevate': 'Elevate',
+    'induc': 'Induce',
+    'enhance': 'Enhance',
+    'imped': 'Imped',
+    'increas': 'Increase',
+    'decreas': 'Descrease'
 }
 
 
-def main(json_loc_train: Path, json_loc_dev: Path, json_loc_test: Path, train_file: Path, dev_file: Path,
+def main(json_loc_train: Path,
+         json_loc_dev: Path,
+         json_loc_test: Path,
+         train_file: Path,
+         dev_file: Path,
          test_file: Path):
     """Creating the corpus from the Prodigy annotations."""
-    Doc.set_extension("rel", default={})
+    Doc.set_extension("rel", default={}, force=True)
     vocab = Vocab()
 
     docs = {"train": [], "dev": [], "test": []}
@@ -39,11 +49,13 @@ def main(json_loc_train: Path, json_loc_dev: Path, json_loc_test: Path, train_fi
     count_pos = {"train": 0, "dev": 0, "test": 0}
     file_paths = {"train": train_file, "dev": dev_file, "test": test_file}
 
+    skipped = []
     for set_type, json_loc in zip(['train', 'dev', 'test'], [json_loc_train, json_loc_dev, json_loc_test]):
         # with json_loc.open("r", encoding="utf8") as jsonfile:
         with open(json_loc, 'r', encoding='utf8') as jsonfile:
             for line in jsonfile:
                 example = json.loads(line)
+
                 span_starts = set()
                 if example["answer"] == "accept":
                     neg = 0
@@ -59,7 +71,9 @@ def main(json_loc_train: Path, json_loc_dev: Path, json_loc_test: Path, train_fi
                         entities = []
                         span_end_to_start = {}
                         for span in spans:
-                            entity = doc.char_span(span["start"], span["end"], label=span["label"])
+                            entity = doc.char_span(span["start"], span["end"], label=span["label"],
+                                                   alignment_mode='expand')
+
                             span_end_to_start[span["token_end"]] = span["token_start"]
                             entities.append(entity)
                             span_starts.add(span["token_start"])
@@ -74,6 +88,7 @@ def main(json_loc_train: Path, json_loc_dev: Path, json_loc_test: Path, train_fi
                         for relation in relations:
                             # the 'head' and 'child' annotations refer to the end token in the span
                             # but we want the first token
+
                             start = span_end_to_start[relation["head"]]
                             end = span_end_to_start[relation["child"]]
                             label = relation["label"]
@@ -97,10 +112,17 @@ def main(json_loc_train: Path, json_loc_dev: Path, json_loc_test: Path, train_fi
                             docs[set_type].append(doc)
                             count_pos[set_type] += pos
                             count_all[set_type] += pos + neg
+
                     except KeyError as e:
                         print('relation_Child: ', relation["child"])
                         print(traceback.format_exc())
                         msg.fail(f"Skipping doc because of key error: {e} in {example['meta']['source']}")
+                        skipped.append(line)
+
+                    except ValueError as e:
+                        print('relation_Child: ', relation["child"])
+                        msg.fail(f"Skipping doc because of value error: {e} in {example['meta']['source']}")
+                        skipped.append(line)
 
         docbin = DocBin(docs=docs[set_type], store_user_data=True)
         docbin.to_disk(file_paths[set_type])
@@ -108,6 +130,7 @@ def main(json_loc_train: Path, json_loc_dev: Path, json_loc_test: Path, train_fi
             f"{len(docs[set_type])} training sentences from {len(ids[set_type])} articles, "
             f"{count_pos[set_type]}/{count_all[set_type]} pos instances."
         )
+        print('Skipped : ', len(skipped))
 
 
 if __name__ == "__main__":

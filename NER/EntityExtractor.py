@@ -4,7 +4,7 @@ from utils import load_yaml_file
 
 class EntityExtractor:
     def __init__(self):
-        self.__project_config = load_yaml_file('./project.yml')
+        self.__project_config = load_yaml_file('./NER/project.yml')
         self.__ner = spacy.load(self.__project_config.vars['trained_model'])
 
     def get_predictions(self, text: str):
