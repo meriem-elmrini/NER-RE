@@ -3,15 +3,15 @@ description: "This project implements a spaCy component with a custom Machine Le
 
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
-  annotations_train: "assets/annotations_train.jsonl"
-  annotations_dev: "assets/annotations_dev.jsonl"
-  annotations_test: "assets/annotations_test.jsonl"
-  tok2vec_config: "configs/rel_tok2vec.cfg"
-  trf_config: "configs/rel_trf.cfg"
-  train_file: "data/train.spacy"
-  dev_file: "data/dev.spacy"
-  test_file: "data/test.spacy"
-  trained_model: "training/model-best"
+  annotations_train: "RE/assets/annotations_train.jsonl"
+  annotations_dev: "RE/assets/annotations_dev.jsonl"
+  annotations_test: "RE/assets/annotations_test.jsonl"
+  tok2vec_config: "RE/configs/rel_tok2vec.cfg"
+  trf_config: "RE/configs/rel_trf.cfg"
+  train_file: "RE/data/train.spacy"
+  dev_file: "RE/data/dev.spacy"
+  test_file: "RE/data/test.spacy"
+  trained_model: "RE/training/model-best"
 
 # These are the directories that the project needs. The project CLI will make
 # sure that they always exist.

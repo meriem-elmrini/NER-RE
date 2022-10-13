@@ -9,28 +9,10 @@ import spacy
 from spacy.vocab import Vocab
 from spacy.tokens import DocBin, Doc
 
-nlp = spacy.blank("en")
-# Create a blank Tokenizer with just the English vocab
+from settings import MAP_LABELS
+
 
 msg = Printer()
-
-MAP_LABELS = {
-    'block': 'Block',
-    'bind': 'Bind',
-    'regul': 'Regulate',
-    'reduc': 'Reduce',
-    'suppress': 'Supress',
-    'promote': 'Promote',
-    'activ': 'Activate',
-    'inhibit': 'Inhibit',
-    'express': 'Express',
-    'elevate': 'Elevate',
-    'induc': 'Induce',
-    'enhance': 'Enhance',
-    'imped': 'Imped',
-    'increas': 'Increase',
-    'decreas': 'Descrease'
-}
 
 
 def main(json_loc_train: Path,

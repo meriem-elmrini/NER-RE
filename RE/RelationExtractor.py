@@ -8,17 +8,16 @@ from RE.scripts.rel_model import create_relation_model, create_classification_la
 
 
 class RelationExtractor:
-    def __init__(self):
+    def __init__(self, model_re='transformer'):
         self.__model = spacy.load('NER/training/model-best', exclude=['tagger', 'parser'])
         self.__re_project_config = load_yaml_file('RE/project.yml')
         self.__re = spacy.load(self.__re_project_config.vars['trained_model'], exclude=['tagger', 'parser'])
-        self.__model.add_pipe("tok2vec", name="re_tok2vec", source=self.__re)
+        self.__model.add_pipe(model_re, name="re_" + model_re, source=self.__re)
         self.__model.add_pipe("relation_extractor", source=self.__re, last=True)
 
     def get_predictions(self, text: str, threshold=0.01, disable_ner=True, ents=[]):
         if disable_ner:
-            nlp = spacy.blank('en')
-            nlp.tokenizer = Tokenizer(nlp.vocab, token_match=re.compile(r'\S+').match)
+            nlp = spacy.load('en_core_web_sm')
             doc = nlp(text)
             doc.ents = [doc.char_span(*ent) for ent in ents]
             doc = self.__re(doc)
