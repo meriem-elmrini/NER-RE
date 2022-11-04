@@ -1,0 +1,9 @@
+Transformer : A transformer model is a neural network that learns context and thus meaning by 	tracking relationships in sequential data like the words in this sentence.Transformer models apply an evolving set of mathematical techniques, called attention or self-attention, to detect subtle ways even distant data elements in a series influence and depend on each other. People use transformers every time they search on Google or Microsoft Bing.
+Like most neural networks, transformer models are basically large encoder/decoder blocks that process data. Small but strategic additions to these blocks (shown in the diagram below) make transformers uniquely powerful.
+Transformer includes two separate mechanisms — an encoder that reads the text input and a decoder that produces a prediction for the task.
+
+
+3 mechanisms (that are not in RNN models) : 
+- Positional encoder : to learn the importance of words order in the input data.
+- Attention : the model learns to give attention to some of the words that are important to translate the word A. 
+- Self-Attention : to learn how to understand a word based on the context around it.

@@ -1,0 +1,18 @@
+BERT (Bidirectional Encoder Representations from Transformers) :
+- BERT’s key technical innovation is applying the bidirectional training of Transformer, a popular attention model, to language modeling.
+
+- Novel technique named Masked LM (MLM) which allows bidirectional training in models in which it was previously impossible.
+Since the aim of BERT is to generate text, it only needs an encoder to encode the input. 
+In BERT, the Transformer encoder reads the entire sequence of words at once. This characteristic allows the model to learn the context of a word based on all of its surroundings (left and right of the word).
+
+- When training language models, there is a challenge of defining a prediction goal. Many models predict the next word in a sequence (e.g. “The child came home from ___”), a directional approach which inherently limits context learning. To overcome this challenge, BERT uses two training strategies:
+	- MLM (Masked Language Model): Before feeding word sequences into BERT, 15% of the words in each sequence are replaced with a [MASK] token. The model then attempts to predict the original value of the masked words, based on the context provided by the other, non-masked, words in the sequence.
+	- NSP (Next Sentence Prediction): In the BERT training process, the model receives pairs of sentences as input and learns to predict if the second sentence in the pair is the subsequent sentence in the original document. During training, 50% of the inputs are a pair in which the second sentence is the subsequent sentence in the original document, while in the other 50% a random sentence from the corpus is chosen as the second sentence. 
+When training the BERT model, Masked LM and Next Sentence Prediction are trained together, with the goal of minimizing the combined loss function of the two strategies.
+
+- BERT can be used for a wide variety of language tasks, while only adding a small layer to the core model. 
+In the fine-tuning training, most hyper-parameters stay the same as in BERT training, and the paper gives specific guidance (Section 3.5) on the hyper-parameters that require tuning.
+
+
+PubmedBert : 
+This PubMedBERT is pretrained from scratch using abstracts from PubMed. It doesn't rely on a mixed-domain approach ! This model achieves state-of-the-art performance on several biomedical NLP tasks, as shown on the Biomedical Language Understanding and Reasoning Benchmark.

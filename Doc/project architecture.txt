@@ -1,0 +1,21 @@
+Project structure 
+
+
+
+Folders : 
+	- assets : preprocessed data. Can be jsonl
+	- data : .spacy data. Formatted by a parsing script
+		- train
+		- dev
+		- test
+	- scripts : custom scripts to do : 
+		- parsing
+		- evaluation
+		- model definition
+	- training : to save trained models
+	- configs : .cfg files to specify parameters of the project and hyperparameters of the 	model : 
+		- data paths
+		- nlp pipeline
+		- models architecture and hyper parameters (depth, width, epochs, optimizer, learning rate...)
+		- training score weights
+	- project.yaml : specify the steps and the commands to run (spacy project run [COMMAND])
