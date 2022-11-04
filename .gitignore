@@ -3,6 +3,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# DS_Store
+*.DS_Store
+
+# idea
+*.idea
+
+# lock
+*.lock
+
 # C extensions
 *.so
 
@@ -127,3 +136,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Data
+additional_data/
+NER/assets/
+RE/assets/
+NER/data/
+RE/data/
+
+# Training
+NER/training_tok2vec/
+NER/training_trf/
+RE/training_tok2vec/
+RE/training_trf/
