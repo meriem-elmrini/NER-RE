@@ -1,11 +1,14 @@
 from itertools import islice
 from typing import Tuple, List, Iterable, Optional, Dict, Callable, Any
+from pathlib import Path
 
+import spacy
 from spacy.scorer import PRFScore
 from thinc.types import Floats2d
 import numpy
 from spacy.training.example import Example
 from thinc.api import Model, Optimizer
+from spacy.tokens import DocBin
 from spacy.tokens.doc import Doc
 from spacy.pipeline.trainable_pipe import TrainablePipe
 from spacy.vocab import Vocab
@@ -201,7 +204,7 @@ class RelationExtractor(TrainablePipe):
         return score_relations(examples, self.threshold)
 
 
-def score_relations(examples: Iterable[Example], threshold: float) -> Dict[str, Any]:
+def score_relations(examples, threshold):
     """Score a batch of examples."""
     micro_prf = PRFScore()
     for example in examples:
@@ -223,3 +226,46 @@ def score_relations(examples: Iterable[Example], threshold: float) -> Dict[str, 
         "rel_micro_r": micro_prf.recall,
         "rel_micro_f": micro_prf.fscore,
     }
+
+
+def score_relations_by_label(examples, threshold, label='Activate'):
+    """Score a batch of examples by label."""
+    micro_prf = PRFScore()
+    for example in examples:
+        gold = example.reference._.rel
+        pred = example.predicted._.rel
+        for key, pred_dict in pred.items():
+            gold_labels = [k for (k, v) in gold.get(key, {}).items() if v == 1.0]
+            if label in gold_labels:
+                for k, v in pred_dict.items():
+                    if v >= threshold:
+                        if k in gold_labels:
+                            micro_prf.tp += 1
+                        else:
+                            micro_prf.fp += 1
+                    else:
+                        if k in gold_labels:
+                            micro_prf.fn += 1
+    return {
+        "rel_micro_p_" + label: micro_prf.precision,
+        "rel_micro_r_" + label: micro_prf.recall,
+        "rel_micro_f_" + label: micro_prf.fscore,
+    }
+
+
+def get_examples_from_model(trained_pipeline: Path, test_data: Path):
+    nlp = spacy.load(trained_pipeline)
+    doc_bin = DocBin(store_user_data=True).from_disk(test_data)
+    docs = doc_bin.get_docs(nlp.vocab)
+    examples = []
+    for gold in docs:
+        pred = Doc(
+            nlp.vocab,
+            words=[t.text for t in gold],
+            spaces=[t.whitespace_ for t in gold],
+        )
+        pred.ents = gold.ents
+        for name, proc in nlp.pipeline:
+            pred = proc(pred)
+        examples.append(Example(pred, gold))
+    return examples

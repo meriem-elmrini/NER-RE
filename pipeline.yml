@@ -1,3 +1,0 @@
-vars:
-  ner_model: "NER/training/model-best"
-  re_model: "RE/training/model-best"

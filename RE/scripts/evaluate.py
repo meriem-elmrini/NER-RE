@@ -1,7 +1,8 @@
 import random
-import typer
 from pathlib import Path
+
 import spacy
+import typer
 from spacy.tokens import DocBin, Doc
 from spacy.training.example import Example
 
@@ -68,14 +69,18 @@ def main(trained_pipeline: Path, test_data: Path, print_details: bool):
 
     print()
     print("Results of the trained model:")
-    _score_and_format(examples, thresholds)
+    results = _score_and_format(examples, thresholds)
+    return results
 
 
 def _score_and_format(examples, thresholds):
+    results_dict = {}
     for threshold in thresholds:
         r = score_relations(examples, threshold)
         results = {k: "{:.2f}".format(v * 100) for k, v in r.items()}
         print(f"threshold {'{:.2f}'.format(threshold)} \t {results}")
+        results_dict[threshold] = results
+    return results_dict
 
 
 if __name__ == "__main__":

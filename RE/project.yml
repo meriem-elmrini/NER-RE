@@ -3,35 +3,30 @@ description: "This project implements a spaCy component with a custom Machine Le
 
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
-  annotations_train: "RE/assets/annotations_train.jsonl"
-  annotations_dev: "RE/assets/annotations_dev.jsonl"
-  annotations_test: "RE/assets/annotations_test.jsonl"
-  tok2vec_config: "RE/configs/rel_tok2vec.cfg"
-  trf_config: "RE/configs/rel_trf.cfg"
-  train_file: "RE/data/train.spacy"
-  dev_file: "RE/data/dev.spacy"
-  test_file: "RE/data/test.spacy"
-  trained_model: "RE/training/model-best"
+  annotations_train: "assets/annotations_train.jsonl"
+  annotations_dev: "assets/annotations_dev.jsonl"
+  annotations_test: "assets/annotations_test.jsonl"
+  tok2vec_config: "configs/rel_tok2vec.cfg"
+  trf_config: "configs/rel_trf.cfg"
+  train_file: "data/train.spacy"
+  dev_file: "data/dev.spacy"
+  test_file: "data/test.spacy"
+  trained_trf: "training_trf/model-best"
+  trained_tok2vec: "training_tok2vec/model-best"
 
 # These are the directories that the project needs. The project CLI will make
 # sure that they always exist.
-directories: ["scripts", "configs", "assets", "data", "training"]
-
-# Assets that should be downloaded or available in the directory. You can replace
-# this with your own input data.
-# assets:
-#     - dest: ${vars.annotations}
-#       description: "Gold-standard REL annotations created with Prodigy"
+directories: ["scripts", "configs", "assets", "data", "training_tok2vec", "training_trf"]
 
 workflows:
   all:
     - data
     - train_cpu
-    - evaluate
+    - evaluate_cpu
   all_gpu:
     - data
     - train_gpu
-    - evaluate
+    - evaluate_gpu
 
 # Project commands, specified in a style similar to CI config files (e.g. Azure
 # pipelines). The name is the command name that lets you trigger the command
@@ -54,29 +49,37 @@ commands:
   - name: "train_cpu"
     help: "Train the REL model on the CPU and evaluate on the dev corpus."
     script:
-      - "python -m spacy train ${vars.tok2vec_config} --output training --paths.train ${vars.train_file} --paths.dev ${vars.dev_file} -c ./scripts/custom_functions.py"
+      - "python -m spacy train ${vars.tok2vec_config} --output training_tok2vec --paths.train ${vars.train_file} --paths.dev ${vars.dev_file} -c ./scripts/custom_functions.py"
     deps:
       - ${vars.train_file}
       - ${vars.dev_file}
     outputs:
-      - ${vars.trained_model}
+      - ${vars.trained_tok2vec}
 
   - name: "train_gpu"
     help: "Train the REL model with a Transformer on a GPU and evaluate on the dev corpus."
     script:
-      - "python -m spacy train ${vars.trf_config} --output training --paths.train ${vars.train_file} --paths.dev ${vars.dev_file} -c ./scripts/custom_functions.py --gpu-id 0"
+      - "python -m spacy train ${vars.trf_config} --output training_trf --paths.train ${vars.train_file} --paths.dev ${vars.dev_file} -c ./scripts/custom_functions.py --gpu-id 0"
     deps:
       - ${vars.train_file}
       - ${vars.dev_file}
     outputs:
-      - ${vars.trained_model}
+      - ${vars.trained_trf}
 
-  - name: "evaluate"
+  - name: "evaluate_cpu"
     help: "Apply the best model to new, unseen text, and measure accuracy at different thresholds."
     script:
-      - "python ./scripts/evaluate.py ${vars.trained_model} ${vars.test_file} False"
+      - "python ./scripts/evaluate.py ${vars.trained_tok2vec} ${vars.test_file} False"
     deps:
-      - ${vars.trained_model}
+      - ${vars.trained_tok2vec}
+      - ${vars.test_file}
+      
+  - name: "evaluate_gpu"
+    help: "Apply the best model to new, unseen text, and measure accuracy at different thresholds."
+    script:
+      - "python ./scripts/evaluate.py ${vars.trained_trf} ${vars.test_file} False"
+    deps:
+      - ${vars.trained_trf}
       - ${vars.test_file}
 
 
@@ -84,4 +87,5 @@ commands:
     help: "Remove intermediate files to start data preparation and training from a clean slate."
     script:
       - "rm -rf data/*"
-      - "rm -rf training/*"
+      - "rm -rf training_tok2vec/*"
+      - "rm -rf training_trf/*"
