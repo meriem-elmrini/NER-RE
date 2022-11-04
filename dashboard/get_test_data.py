@@ -11,8 +11,8 @@ def read_jsonl(data_path):
     return pd.DataFrame(data)
 
 
-data = read_jsonl('test_data/doccano_doc_test.jsonl')
+data = read_jsonl('../additional_data/test_data/doccano_doc_test.jsonl')
 examples = data.sample(10).text.values
 
-with open('test_data/example.txt', 'w') as f:
+with open('../additional_data/test_data/example.txt', 'w') as f:
     f.write(str(examples))

@@ -6,7 +6,7 @@ def define_sidebar(pages):
         page = st.sidebar.selectbox('Pages', pages)
         if page == pages[1]:
             model = st.radio('Choose your model',
-                             ['syntax', 'tok2vec', 'transformer'])
+                             ['syntax', 'tok2vec', 'trf'])
             threshold = st.slider('Set your threshold',
                                   min_value=0.0,
                                   max_value=1.0,

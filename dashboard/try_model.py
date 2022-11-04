@@ -57,7 +57,7 @@ def get_spans(sentence, entities):
 
 def get_prediction(model, sentence, type_entities=False, spans=None, threshold=0.4):
     if model != 'syntax':
-        rel = RelationExtractor(model_re=model)
+        rel = RelationExtractor(model=model)
         if type_entities:
             predicted_spans, predicted_relations = rel.get_predictions(text=sentence,
                                                                        threshold=threshold,
